@@ -119,3 +119,6 @@ ENV/
 *.pyc
 *.pyc
 *.pyc
+
+resourcified/local_settings.py
+local_settings.py

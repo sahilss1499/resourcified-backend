@@ -46,6 +46,7 @@ class Post(models.Model):
     link = models.URLField()
     description = models.TextField(blank=True, null=True)
     course = models.ForeignKey(Course, related_name="post_for_course", on_delete=models.CASCADE)
+    upvote_count = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True, auto_now=False)
     modified_at = models.DateTimeField(auto_now_add=False, auto_now=True)
@@ -60,6 +61,9 @@ class UpVote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,related_name="upvote_by")
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="upvote_for_post")
     created_at = models.DateTimeField(auto_now_add=True, auto_now=False)
+
+    class Meta:
+        unique_together = ('user','post')
 
     def __str__(self):
         return f"{self.user.email} {self.post}"
