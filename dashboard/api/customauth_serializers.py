@@ -84,3 +84,15 @@ class LoginSerializer(serializers.ModelSerializer):
             'institute': user.institute,
         }
         return super().validate(data)
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email','phone','full_name','role','branch','institute','profile_image','gender','degree')
+        extra_kwargs = {
+            'email':{'read_only':True},
+            'role':{'read_only':True},
+            'institute':{'read_only':True},
+            'branch':{'read_only':True},
+            }

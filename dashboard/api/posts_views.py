@@ -11,9 +11,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
 from django.db.models import Count
 
-from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseSerializer, PostSerializer)
+from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseSerializer, PostSerializer, UpVoteSerializer)
 from posts.models import (Institute, Branch, Course,Post, UpVote)
 from customauth.models import (User)
+
+  
+import logging
+logger = logging.getLogger('')
 
 class InstituteListAPIView(ListAPIView):
     permission_classes = (permissions.AllowAny,)
@@ -52,6 +56,7 @@ class CourseCreateListAPIView(ListAPIView):
         user=User.objects.get(id=self.request.user.id)
 
         if user.role != 'admin':
+            logger.warning(f"unauthorized attempt to POST a new course by {user.email}")
             return Response({"detail": "User not authorised to perform this operation"}, status=status.HTTP_401_UNAUTHORIZED)
         
         serializer = CourseSerializer(data=request.data,partial=True)
@@ -72,13 +77,16 @@ class PostCreateListAPIView(APIView):
         course = self.request.query_params.get('course', None)
         if course is None:
             return Response({"detail": "Please add course id to the query params"}, status=status.HTTP_400_BAD_REQUEST)
-        posts = Post.objects.filter(course=course)
 
-        serializer = PostSerializer(posts,many=True)
+        posts = Post.objects.filter(course=course)
+        logger.info("Starting to populate is_already_upvoted")
+        # context dictionary is used to access the user who sent the request to serializer method get_is_already_upvoted
+        serializer = PostSerializer(posts,context={'request':request},many=True)
+        logger.info("Ended populating is_already_upvoted")
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self,request,format=None):
-        serializer = PostSerializer(data=request.data)
+        serializer = PostSerializer(data=request.data,context={'request':request})
 
         if serializer.is_valid():
             user=User.objects.get(id=self.request.user.id)
@@ -86,3 +94,87 @@ class PostCreateListAPIView(APIView):
             data['created_by']=user
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+
+class PostDetailAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = PostSerializer
+
+    def get_object(self,pk):
+        try:
+            return Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            raise Http404
+
+    def get(self,request,pk,format=None):
+        post = self.get_object(pk)
+        serializer = PostSerializer(post,context={'request':request})
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self,request,pk,format=None):
+        post = self.get_object(pk)
+        
+        if post.created_by.id != self.request.user.id:
+            logger.warning(f"unauthorized attempt to MODIFY a post ({post}) by {self.request.user.email}")
+            return Response({"detail": "User not authorised to perform this operation"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        serializer = PostSerializer(post, request.data, context={'request':request},partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk, format=None):
+        post = self.get_object(pk)
+        print(post.created_by)
+        print(self.request.user.id)
+        if post.created_by.id != self.request.user.id:
+            logger.warning(f"unauthorized attempt to DELETE a post ({post}) by {self.request.user.email}")
+            return Response({"detail": "User not authorised to perform this operation"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        post.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class UpVoteAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UpVoteSerializer
+
+    def post(self,request,format=None):
+        serializer = UpVoteSerializer(data=request.data)
+        post = Post.objects.get(id=request.data["post"])
+
+        if serializer.is_valid():
+            serializer.save()
+            post.upvote_count += 1
+            post.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            upvote = UpVote.objects.get(post=request.data["post"], user=request.data["user"])
+            upvote.delete()
+            post.upvote_count -= 1
+            post.save()
+            return Response({"detail": "UpVote deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+class UserUpVotedPosts(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self,request,format=None):
+        upvote_qs = UpVote.objects.filter(user=self.request.user.id)
+        post_ids = []
+
+        for upvote in upvote_qs:
+            post_ids.append(upvote.post.id)
+        
+        posts = Post.objects.filter(id__in=post_ids)
+        serializer = PostSerializer(posts,context={'request':request},many=True)
+
+        return Response(serializer.data)

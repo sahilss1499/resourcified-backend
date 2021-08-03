@@ -39,7 +39,7 @@ class Course(models.Model):
     modified_by = models.ForeignKey(User, related_name='course_modified_by', on_delete=models.PROTECT,blank=True,null=True)
 
     def __str__(self):
-        return f"{self.name} {self.branch} {self.institute}"
+        return f"Name:{self.name},Branch:{self.branch},Insti:{self.institute}"
 
 
 class Post(models.Model):
@@ -54,7 +54,7 @@ class Post(models.Model):
     modified_by = models.ForeignKey(User, related_name='post_modified_by', on_delete=models.PROTECT,blank=True,null=True)
 
     def __str__(self):
-        return f"{str(self.created_by.email)} {self.course.name}"
+        return f"User: {str(self.created_by.email)} PostID: {self.id}"
 
 
 class UpVote(models.Model):
@@ -66,4 +66,4 @@ class UpVote(models.Model):
         unique_together = ('user','post')
 
     def __str__(self):
-        return f"{self.user.email} {self.post}"
+        return f"User: {self.user.email}, Post: {self.post}"
