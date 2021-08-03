@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from posts.models import Institute, Branch, Course, Post, UpVote
 
+from .customauth_serializers import UserProfileSerializer
+
 class InstituteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institute
@@ -18,9 +20,14 @@ class CourseSerializer(serializers.ModelSerializer):
         model = Course
         fields = ('__all__')
 
+class PostSerialzier(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ('__all__')
 
-class PostSerializer(serializers.ModelSerializer):
+class PostShowSerializer(serializers.ModelSerializer):
     is_already_upvoted = serializers.SerializerMethodField(read_only=True)
+    created_by = UserProfileSerializer()
     class Meta:
         model = Post
         # fields = ('link','description','course','upvote_count','created_at','modified_at','created_by','modified_by','already_upvoted')

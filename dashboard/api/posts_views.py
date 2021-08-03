@@ -11,7 +11,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import Http404
 from django.db.models import Count
 
-from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseSerializer, PostSerializer, UpVoteSerializer)
+from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseSerializer, PostSerialzier, 
+                                PostShowSerializer, UpVoteSerializer)
 from posts.models import (Institute, Branch, Course,Post, UpVote)
 from customauth.models import (User)
 
@@ -69,24 +70,18 @@ class CourseCreateListAPIView(ListAPIView):
     
 
 
-class PostCreateListAPIView(APIView):
+class PostCreateListAPIView(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = PostSerializer
+    serializer_class = PostShowSerializer
+    filter_backends = [DjangoFilterBackend,filters.SearchFilter]
+    filterset_fields = ['course','created_by']
 
-    def get(self,request,format=None):
-        course = self.request.query_params.get('course', None)
-        if course is None:
-            return Response({"detail": "Please add course id to the query params"}, status=status.HTTP_400_BAD_REQUEST)
-
-        posts = Post.objects.filter(course=course)
-        logger.info("Starting to populate is_already_upvoted")
-        # context dictionary is used to access the user who sent the request to serializer method get_is_already_upvoted
-        serializer = PostSerializer(posts,context={'request':request},many=True)
-        logger.info("Ended populating is_already_upvoted")
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        queryset = Post.objects.all().order_by('-created_at')
+        return queryset
 
     def post(self,request,format=None):
-        serializer = PostSerializer(data=request.data,context={'request':request})
+        serializer = PostSerialzier(data=request.data,context={'request':request})
 
         if serializer.is_valid():
             user=User.objects.get(id=self.request.user.id)
@@ -100,7 +95,7 @@ class PostCreateListAPIView(APIView):
 
 class PostDetailAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = PostSerializer
+    serializer_class = PostShowSerializer
 
     def get_object(self,pk):
         try:
@@ -110,7 +105,7 @@ class PostDetailAPIView(APIView):
 
     def get(self,request,pk,format=None):
         post = self.get_object(pk)
-        serializer = PostSerializer(post,context={'request':request})
+        serializer = PostShowSerializer(post,context={'request':request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -121,7 +116,7 @@ class PostDetailAPIView(APIView):
             logger.warning(f"unauthorized attempt to MODIFY a post ({post}) by {self.request.user.email}")
             return Response({"detail": "User not authorised to perform this operation"}, status=status.HTTP_401_UNAUTHORIZED)
         
-        serializer = PostSerializer(post, request.data, context={'request':request},partial=True)
+        serializer = PostSerialzier(post, request.data, context={'request':request},partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -175,6 +170,6 @@ class UserUpVotedPosts(APIView):
             post_ids.append(upvote.post.id)
         
         posts = Post.objects.filter(id__in=post_ids)
-        serializer = PostSerializer(posts,context={'request':request},many=True)
+        serializer = PostShowSerializer(posts,context={'request':request},many=True)
 
         return Response(serializer.data)

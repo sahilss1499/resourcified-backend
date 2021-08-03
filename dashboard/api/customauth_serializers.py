@@ -89,8 +89,9 @@ class LoginSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email','phone','full_name','role','branch','institute','profile_image','gender','degree')
+        fields = ('id','email','phone','full_name','role','branch','institute','profile_image','gender','degree')
         extra_kwargs = {
+            'id':{'read_only':True},
             'email':{'read_only':True},
             'role':{'read_only':True},
             'institute':{'read_only':True},
