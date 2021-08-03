@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-lb-k5a++vm-!67(m&wy(im3$ek@cs*c_%07r9kmy3@2pnxy9*d
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+FRONTEND_BASE_URL = "http://localhost:3000/"
 
 # Application definition
 

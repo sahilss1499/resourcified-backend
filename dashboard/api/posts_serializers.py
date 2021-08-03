@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from posts.models import Institute, Branch, Course, Post, UpVote
+from posts.models import Institute, Branch, Course, Post, UpVote, EmailNotificationSubscription
 
 from .customauth_serializers import UserProfileSerializer
 
@@ -16,9 +16,17 @@ class BranchSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    email_notification_subscription = serializers.SerializerMethodField()
     class Meta:
         model = Course
         fields = ('__all__')
+    
+    def get_email_notification_subscription(self,obj):
+        try:
+            email_noti_obj = EmailNotificationSubscription.objects.get(user=self.context['request'].user.id, course=obj.id)
+            return email_noti_obj.id
+        except EmailNotificationSubscription.DoesNotExist:
+            return None
 
 class PostSerialzier(serializers.ModelSerializer):
     class Meta:
@@ -50,4 +58,10 @@ class PostShowSerializer(serializers.ModelSerializer):
 class UpVoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = UpVote
+        fields = ('__all__')
+
+    
+class EmailNotificationSubsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmailNotificationSubscription
         fields = ('__all__')

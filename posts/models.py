@@ -67,3 +67,16 @@ class UpVote(models.Model):
 
     def __str__(self):
         return f"User: {self.user.email}, Post: {self.post}"
+
+
+
+class EmailNotificationSubscription(models.Model):
+    user = models.ForeignKey(User, related_name="user_email_notfication", on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name="course_email_notification", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, auto_now=False)
+
+    class Meta:
+        unique_together = ('user','course')
+    
+    def __str__(self):
+        return f"User:{self.user.email}, Course:{self.course.name}"

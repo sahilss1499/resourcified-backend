@@ -3,7 +3,8 @@ from django.urls import path
 from .customauth_views import (SignUp, LoginAPIView, UserProfileAPIView)
 
 from .posts_views import (InstituteListAPIView, BranchListAPIView, CourseCreateListAPIView,
-                            PostCreateListAPIView, PostDetailAPIView, UpVoteAPIView, UserUpVotedPosts)
+                            PostCreateListAPIView, PostDetailAPIView, UpVoteAPIView, UserUpVotedPosts,
+                            EmailNotificationSubsAPIView, EmailNotiSubsDetailView)
 
 urlpatterns = [
     path('signup', SignUp.as_view()),
@@ -17,4 +18,6 @@ urlpatterns = [
     path('posts/<int:pk>', PostDetailAPIView.as_view()),
     path('upvote', UpVoteAPIView.as_view()),
     path('user-upvoted-posts', UserUpVotedPosts.as_view()),
+    path('email-notification-subscription', EmailNotificationSubsAPIView.as_view()),
+    path('email-notification-subscription/<int:pk>', EmailNotiSubsDetailView.as_view()),
 ]
