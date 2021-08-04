@@ -229,5 +229,6 @@ class EmailNotiSubsDetailView(APIView):
     
     def delete(self, request, pk, format=None):
         email_noti_obj = self.get_object(pk)
+        logger.info(f"{email_noti_obj.user} Subscription deleted for {email_noti_obj.course}")
         email_noti_obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
