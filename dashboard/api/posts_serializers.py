@@ -14,6 +14,19 @@ class BranchSerializer(serializers.ModelSerializer):
         model = Branch
         fields = ('__all__')
 
+class CourseShowSerializer(serializers.ModelSerializer):
+    branch = BranchSerializer()
+    email_notification_subscription = serializers.SerializerMethodField()
+    class Meta:
+        model = Course
+        fields = ('__all__')
+    
+    def get_email_notification_subscription(self,obj):
+        try:
+            email_noti_obj = EmailNotificationSubscription.objects.get(user=self.context['request'].user.id, course=obj.id)
+            return email_noti_obj.id
+        except EmailNotificationSubscription.DoesNotExist:
+            return None
 
 class CourseSerializer(serializers.ModelSerializer):
     email_notification_subscription = serializers.SerializerMethodField()

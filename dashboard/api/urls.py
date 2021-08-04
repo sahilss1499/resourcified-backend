@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .customauth_views import (SignUp, LoginAPIView, UserProfileAPIView)
+from .customauth_views import (SignUp, LoginAPIView, CurrentUserProfileAPIView, ListUserProfile)
 
 from .posts_views import (InstituteListAPIView, BranchListAPIView, CourseCreateListAPIView,
                             PostCreateListAPIView, PostDetailAPIView, UpVoteAPIView, UserUpVotedPosts,
@@ -9,7 +9,8 @@ from .posts_views import (InstituteListAPIView, BranchListAPIView, CourseCreateL
 urlpatterns = [
     path('signup', SignUp.as_view()),
     path('login', LoginAPIView.as_view()),
-    path('user-profile', UserProfileAPIView.as_view()),
+    path('current-user-profile', CurrentUserProfileAPIView.as_view()),
+    path('user-profiles', ListUserProfile.as_view()),
 
     path('institutes', InstituteListAPIView.as_view()),
     path('branches', BranchListAPIView.as_view()),

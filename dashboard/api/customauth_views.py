@@ -1,4 +1,4 @@
-from rest_framework import permissions, status
+from rest_framework import permissions, status, filters
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework import viewsets
@@ -40,7 +40,7 @@ class LoginAPIView(APIView):
 
 
 
-class UserProfileAPIView(APIView):
+class CurrentUserProfileAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserProfileSerializer
 
@@ -69,3 +69,14 @@ class UserProfileAPIView(APIView):
         user = self.get_object(self.request.user.id)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ListUserProfile(ListAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserProfileSerializer
+    filter_backends = [DjangoFilterBackend,filters.SearchFilter]
+    filterset_fields = ['id','institute', 'branch']
+
+    def get_queryset(self):
+        queryset = User.objects.all().order_by('-joined_at')
+        return queryset

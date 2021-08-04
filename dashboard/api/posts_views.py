@@ -1,4 +1,3 @@
-from functools import partial
 from rest_framework import permissions, status, filters
 from rest_framework import serializers
 from rest_framework.generics import ListAPIView
@@ -13,7 +12,7 @@ from django.db.models import Count
 
 from resourcified.settings import FRONTEND_BASE_URL
 
-from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseSerializer, PostSerialzier, 
+from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseShowSerializer, CourseSerializer, PostSerialzier, 
                                 PostShowSerializer, UpVoteSerializer, EmailNotificationSubsSerializer)
 from posts.models import (Institute, Branch, Course,Post, UpVote, EmailNotificationSubscription)
 from customauth.models import (User)
@@ -47,7 +46,7 @@ class BranchListAPIView(ListAPIView):
 
 class CourseCreateListAPIView(ListAPIView):
     permission_classes = (permissions.IsAuthenticated,)
-    serializer_class = CourseSerializer
+    serializer_class = CourseShowSerializer
 
     filter_backends = [DjangoFilterBackend,filters.SearchFilter]
     filterset_fields = ['branch','institute']

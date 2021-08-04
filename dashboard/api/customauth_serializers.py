@@ -4,6 +4,8 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework_jwt.settings import api_settings
 
 from customauth.models import (User)
+from posts.models import Institute, Branch
+
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth.models import auth
 import jwt
@@ -11,6 +13,8 @@ from django.conf import settings
 from rest_framework.response import Response
 import random
 from rest_framework import permissions
+
+
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -86,7 +90,20 @@ class LoginSerializer(serializers.ModelSerializer):
         return super().validate(data)
 
 
+class InstituteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Institute
+        fields = ('__all__')
+
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ('__all__')
+
 class UserProfileSerializer(serializers.ModelSerializer):
+    
+    institute = InstituteSerializer()
+    branch = BranchSerializer()
     class Meta:
         model = User
         fields = ('id','email','phone','full_name','role','branch','institute','profile_image','gender','degree')
