@@ -16,6 +16,7 @@ class BranchSerializer(serializers.ModelSerializer):
 
 class CourseShowSerializer(serializers.ModelSerializer):
     branch = BranchSerializer()
+    institute = InstituteSerializer()
     email_notification_subscription = serializers.SerializerMethodField()
     class Meta:
         model = Course
