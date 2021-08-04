@@ -63,7 +63,7 @@ class CourseCreateListAPIView(ListAPIView):
             logger.warning(f"unauthorized attempt to POST a new course by {user.email}")
             return Response({"detail": "User not authorised to perform this operation"}, status=status.HTTP_401_UNAUTHORIZED)
         
-        serializer = CourseSerializer(data=request.data,partial=True)
+        serializer = CourseSerializer(data=request.data,context={'request':request},partial=True)
 
         if serializer.is_valid():
             data=serializer.validated_data
