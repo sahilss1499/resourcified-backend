@@ -203,3 +203,9 @@ LOGGING = {
         },
     },
 }
+
+
+try:
+    from resourcified.local_settings import *
+except ImportError:
+    pass
