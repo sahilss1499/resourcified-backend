@@ -17,7 +17,7 @@ from .posts_serializers import (InstituteSerializer, BranchSerializer, CourseSho
 from posts.models import (Institute, Branch, Course,Post, UpVote, EmailNotificationSubscription)
 from customauth.models import (User)
 
-from .email_service import sendMail
+from .email_service import sendMail, sendHTMLPostMail
   
 import logging
 logger = logging.getLogger('')
@@ -101,9 +101,15 @@ class PostCreateListAPIView(ListAPIView):
             post_id = serializer.data["id"]
             frontend_url = f"{FRONTEND_BASE_URL}posts/{post_id}"
             message = f"Check out the post @ {frontend_url}"
-            sendMail(subject=subject, message=message, recipient_list=subscribed_user_emails)
+            # sendMail(subject=subject, message=message, recipient_list=subscribed_user_emails)
+            sendHTMLPostMail(subject=subject,
+                            post_created_by=user.full_name,
+                            course_name=course_name,
+                            frontend_url=frontend_url,
+                            recipient_list=subscribed_user_emails)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -134,6 +140,9 @@ class PostDetailAPIView(APIView):
         serializer = PostSerialzier(post, request.data, context={'request':request},partial=True)
 
         if serializer.is_valid():
+            user=User.objects.get(id=self.request.user.id)
+            data=serializer.validated_data
+            data['modified_by']=user
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

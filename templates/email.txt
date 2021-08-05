@@ -1,0 +1,2 @@
+We have sent you this email as {{ post_created_by }} added a new resource to the course {{ course_name }} you are intrested in.
+View the post @ {{ frontend_url }}
