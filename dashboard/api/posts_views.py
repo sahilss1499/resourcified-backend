@@ -98,8 +98,8 @@ class PostCreateListAPIView(ListAPIView):
                 subscribed_user_emails.append(obj.user.email)
             
             subject=f"{user.full_name} just added a new resource for the course {course_name} do check it out!"
-            post_id = serializer.data["id"]
-            frontend_url = f"{FRONTEND_BASE_URL}posts/{post_id}"
+            course_id = serializer.data["course"]
+            frontend_url = f"{FRONTEND_BASE_URL}posts/{course_id}"
             message = f"Check out the post @ {frontend_url}"
             # sendMail(subject=subject, message=message, recipient_list=subscribed_user_emails)
             sendHTMLPostMail(subject=subject,
