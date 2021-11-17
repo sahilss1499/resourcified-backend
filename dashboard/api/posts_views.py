@@ -49,7 +49,7 @@ class CourseCreateListAPIView(ListAPIView):
     serializer_class = CourseShowSerializer
 
     filter_backends = [DjangoFilterBackend,filters.SearchFilter]
-    filterset_fields = ['branch','institute']
+    filterset_fields = ['branch','branch__institute']
 
     def get_queryset(self):
         queryset = Course.objects.all().order_by('-id')

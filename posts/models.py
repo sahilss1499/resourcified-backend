@@ -31,7 +31,6 @@ class Branch(models.Model):
 class Course(models.Model):
     name = models.CharField(max_length=250)
     branch = models.ForeignKey(Branch, related_name="branch_course", on_delete=models.CASCADE)
-    institute = models.ForeignKey(Institute, related_name="institute_course", on_delete=models.CASCADE)
 
     created_at = models.DateTimeField(auto_now_add=True, auto_now=False)
     modified_at = models.DateTimeField(auto_now_add=False, auto_now=True)
